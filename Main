@@ -1,0 +1,268 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package notatnik;
+
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+/**
+ *
+ * @author Root
+ */
+
+class Rysuj extends JFrame{
+    private JFileChooser file;
+    private JTextArea poleTekstowe;
+    private JMenuBar bar;
+    private JMenu plik;
+    private JMenu edycja;
+    private JMenu pomoc;
+    private JMenuItem otworzPlik;
+    private JMenuItem zapiszPlik;
+    private JMenuItem wyjdzPlik;
+    private JMenuItem czciakaEdycja;
+    private JMenuItem kolor;
+    private JMenuItem info;
+    public Rysuj(){
+        BorderLayout layout = new BorderLayout();
+        setSize(500,500);
+        setTitle("Notanik");
+        setLayout(layout);
+        bar = new JMenuBar();
+        setJMenuBar(bar);
+        plik = new JMenu("Plik");
+        edycja = new JMenu("Edycja");
+        pomoc = new JMenu("Pomoc");
+        bar.add(plik);
+        bar.add(edycja);
+        bar.add(pomoc);        
+        otworzPlik = new JMenuItem("Otwórz");
+        plik.add(otworzPlik);        
+        otworzPlik.addActionListener(new Otworz());
+        zapiszPlik = new JMenuItem("Zapisz");
+        plik.add(zapiszPlik);
+        plik.addSeparator();
+        zapiszPlik.addActionListener(new Zapisz());
+        wyjdzPlik = new JMenuItem("Wyjdź");
+        plik.add(wyjdzPlik);
+        wyjdzPlik.addActionListener(new Wyjdz());
+        czciakaEdycja = new JMenuItem("Edycja czciąki");
+        edycja.add(czciakaEdycja);
+        czciakaEdycja.addActionListener(new Czciaka());
+        info = new JMenuItem("Informacja");
+        pomoc.add(info);
+        info.addActionListener(new Info());
+        kolor = new JMenuItem("Kolor czciąki");
+        kolor.addActionListener(new Kolor());
+        edycja.add(kolor);
+        poleTekstowe = new JTextArea();
+        poleTekstowe.setBounds(0,0,500,500);
+        JScrollPane scroll = new JScrollPane(poleTekstowe);
+        scroll.setBounds(0,0,500,500);
+        add(scroll,BorderLayout.CENTER); 
+        file = new JFileChooser();
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                JOptionPane.showMessageDialog(null, "Pamiętaj o zapisaniu pracy!!!");
+                if(file.showSaveDialog(null)==JFileChooser.APPROVE_OPTION){
+                File plik = file.getSelectedFile();
+                try {
+                    PrintWriter printU = new PrintWriter(plik);
+                    Scanner skaner = new Scanner(poleTekstowe.getText());
+                    while(skaner.hasNext()){
+                        printU.println(skaner.nextLine()+"\n");
+                    }
+                    printU.close();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Rysuj.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+});
+    }
+    
+    class Otworz implements ActionListener{
+            @Override
+            public void actionPerformed(ActionEvent e){
+                file.setFileFilter(new FileNameExtensionFilter("Plik tekstowy (*.txt)","txt"));
+                if(file.showOpenDialog(null)==JFileChooser.APPROVE_OPTION){
+                   try {
+                    File plik = file.getSelectedFile();                    
+                    Scanner skaner = new Scanner(plik);
+                    while(skaner.hasNext()){
+                        poleTekstowe.append(skaner.nextLine()+"\n");
+                    }
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Rysuj.class.getName()).log(Level.SEVERE, null, ex);
+                }                    
+                }
+            }
+        }
+    class Zapisz implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e){
+            if(file.showSaveDialog(null)==JFileChooser.APPROVE_OPTION){
+                File plik = file.getSelectedFile();
+                try {
+                    PrintWriter printU = new PrintWriter(plik);
+                    Scanner skaner = new Scanner(poleTekstowe.getText());
+                    while(skaner.hasNext()){
+                        printU.println(skaner.nextLine()+"\n");
+                    }
+                    printU.close();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Rysuj.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+    class Wyjdz implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e){
+            dispose();
+        }
+    }
+    class Info implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e){
+            JOptionPane.showMessageDialog(null, "Program notatkik, umożliwia zapis i otiwranie plików. \n Autor: Izabela Boruch \n Data Utworzenia: 07.08.2017","Informacja",JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    class Kolor implements ActionListener{
+        private JButton button;
+        private JColorChooser color;
+        private JFrame frame;
+        @Override
+        public void actionPerformed(ActionEvent e){
+            frame = new JFrame();
+            frame.setSize(500,500);
+            frame.setTitle("Wybierz kolor");
+            frame.setLayout(new BorderLayout());
+            color = new JColorChooser();
+            frame.add(color,BorderLayout.CENTER);
+            button= new JButton("zatwierdź");
+            frame.add(button,BorderLayout.SOUTH);
+            frame.setVisible(true);
+            button.addActionListener(new But());
+        }
+        class But implements ActionListener{
+            @Override
+            public void actionPerformed(ActionEvent e){
+                poleTekstowe.setForeground(color.getColor());
+                frame.dispose();
+            }
+        }
+    }
+    class Czciaka implements ActionListener{
+        private String[] wielkosc = {"2","4","6","8","10","12","16","18","20","22","24","26","28","30","42","72"};
+        private JList lista = new JList(wielkosc);
+        private ButtonGroup group = new ButtonGroup();
+        private JRadioButton bold = new JRadioButton("Pogrubione");
+        private JRadioButton plain = new JRadioButton("Zwykłe");
+        private JRadioButton italic = new JRadioButton("Pochyłe");
+        private JButton button = new JButton("Zatwierdź");
+        private String rozmiar;
+        private JFrame frame;
+        @Override
+        public void actionPerformed(ActionEvent e){
+            frame  = new JFrame();
+            frame.setSize(300,200);
+            frame.setTitle("Wybierz rodzaj Czciąki");                    
+            plain.setSelected(true);            
+            group.add(bold);
+            group.add(plain);
+            group.add(italic);
+            frame.setLayout(null);
+            lista.addListSelectionListener(new Lista());         
+            lista.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            lista.setVisibleRowCount(6);
+            JScrollPane scroll = new JScrollPane(lista);
+            scroll.setBounds(30,20,40,100);
+            bold.setBounds(90,20,150,30);
+            plain.setBounds(90,50,150,30);
+            italic.setBounds(90,80,150,30);
+            button.setBounds(30,150,150,20);
+            frame.add(scroll);    
+            frame.add(bold);  
+            frame.add(plain); 
+            frame.add(italic);
+            frame.add(button);
+            button.addActionListener(new Zdarzenie());
+            frame.setResizable(false);
+            frame.setVisible(true);            
+        }
+        class Lista implements ListSelectionListener{
+            @Override
+            public void valueChanged(ListSelectionEvent e){
+                if(!e.getValueIsAdjusting()){
+                    rozmiar = (String) lista.getSelectedValue();
+                }
+            }
+        }
+        class Zdarzenie implements ActionListener{
+            @Override 
+            public void actionPerformed(ActionEvent e){
+                Object zrodlo = e.getSource();
+                if(zrodlo == button){
+                    if(bold.isSelected()){
+                        Font fo = new Font("Arial",Font.BOLD,Integer.parseInt(rozmiar));
+                        poleTekstowe.setFont(fo);
+                    }
+                    if(plain.isSelected()){
+                        Font fo = new Font("Arial",Font.PLAIN,Integer.parseInt(rozmiar));
+                        poleTekstowe.setFont(fo);
+                    }
+                    if(italic.isSelected()){
+                        Font fo = new Font("Arial",Font.ITALIC,Integer.parseInt(rozmiar));
+                        poleTekstowe.setFont(fo);
+                    }
+                    frame.dispose();
+                }
+            }
+        }
+    }
+}
+
+public class Notatnik {
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        // TODO code application logic here
+        Rysuj r  = new Rysuj();
+        r.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        r.setVisible(true);
+    }
+    
+}
